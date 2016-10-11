@@ -15,6 +15,14 @@ class QueryBuilder
         'timestamp' => 'NOW()',
         'id_statut' => '"1"',
     );
+
+    public static function insert($jsonRequest) { 
+        $request = json_decode($jsonRequest);
+        $schema = self::getSchema($request->entity);
+        if ($schema) {
+            self::execQuery(self::buildPrimaryInsertQuery($schema, $request));   
+        }
+    }
     
     public static function update($jsonRequest) {
         $request = json_decode($jsonRequest);
@@ -47,8 +55,6 @@ class QueryBuilder
         }
     }
 
-  
-
     /**
     * build query change statut last row
     */
@@ -61,6 +67,30 @@ class QueryBuilder
         }
         $query = 'UPDATE ' . $tableName . ' SET id_statut = 0' . ' WHERE id_statut = 1 AND ' . $schema->key .' = ' . $key . ' ORDER BY ' . $schema->order . ' LIMIT 1';
         $executedQuery = self::execQuery($query);
+    }
+
+    /**
+    * build primary insert query
+    */
+    public static function buildPrimaryUpdateQuery($schema, $request) {
+        $query = 'INSERT INTO ' . $schema->table_name . '(';
+        foreach ($schema->fields as $field => $value) {
+            end($schema->fields);
+            if ($field === key($schema->fields)){
+                $query .= $field;
+            } else {
+                $query .= $field . ',';
+            }
+        }
+        $query .= " )VALUES( ";
+        foreach ($request->values as $field => $value) {
+            end($request->values);
+            if ($field === key($request->values)){
+                $query .= $value;
+            } else {
+                $query .= $value . ',';
+            }
+        }
     }
 
     /**
