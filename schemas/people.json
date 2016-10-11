@@ -1,0 +1,35 @@
+{
+	"table_name" : "people",
+	"front_name" : "membre",
+	"order" : "timestamp DESC",
+	"key" : "id_people",
+	"fields" : {
+		"timestamp" : "timestamp",
+		"id_statut" : "statut",
+		"id_people" : "id",
+		"nom" : "nom",
+		"prenom" : "prenom",
+		"raison_sociale" : "raison_sociale",
+		"vignette" : "vignette",
+		"groupe" : "groupe",
+		"profil" : "profil",
+		"login_hash" : "login_hash",
+		"pass_hash" : "password_hash"
+	},
+	"sub_tables" : {
+		"people_parents" : {
+			"table_name" : "people_parents",
+			"front_name" : "parent",
+			"order" : "timestamp DESC",
+			"key" : "id_people",
+			"fields" : {
+				"timestamp" : "timestamp",
+				"id_statut" : "statut id",
+				"id_people" : "id people",
+				"parent_de_id" : "parent de",
+				"titre" : "titre",
+				"autorite_parentale" : "autorite parentale"
+			}
+		}
+	}  
+}
