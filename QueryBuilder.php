@@ -20,6 +20,8 @@ class QueryBuilder
         $request = json_decode($jsonRequest);
         $schema = self::getSchema($request->entity);
         if ($schema) {
+            self::changeStatutLastRow($schema, $request);
+            self::execQuery(self::buildPrimaryUpdateQuery($schema, $request));
             if ($request->sub_values) {
                 foreach ($schema->sub_tables as $subTable) {
                     $tableName = $subTable->table_name;
@@ -58,8 +60,6 @@ class QueryBuilder
             $key = $request->key;
         }
         $query = 'UPDATE ' . $tableName . ' SET id_statut = 0' . ' WHERE id_statut = 1 AND ' . $schema->key .' = ' . $key . ' ORDER BY ' . $schema->order . ' LIMIT 1';
-        var_dump($query);
-        die();
         $executedQuery = self::execQuery($query);
     }
 
