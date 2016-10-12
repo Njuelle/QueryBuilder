@@ -20,6 +20,7 @@ class QueryBuilder
         $request = json_decode($jsonRequest);
         $schema = self::getSchema($request->entity);
         if ($schema) {
+            var_dump(self::buildPrimaryInsertQuery($schema, $request));
             self::execQuery(self::buildPrimaryInsertQuery($schema, $request));   
         }
     }
@@ -56,6 +57,19 @@ class QueryBuilder
     }
 
     /**
+    * generate id for entity (id_people...)
+    */
+    public static function generateIdEntity($schema) {
+        $query = 'SELECT ' . $schema->key . ' FROM ' . $schema->table_name . ' ORDER BY ' . $schema->order . ' LIMIT 1';
+        $lastId = self::execQuery($query);
+        var_dump($lastId);die();
+        if ($lastId) {
+            return $lastId++;
+        }
+        return 1;
+    }
+
+    /**
     * build query change statut last row
     */
     public static function changeStatutLastRow($schema, $request, $tableName = null, $key = null) {
@@ -72,7 +86,7 @@ class QueryBuilder
     /**
     * build primary insert query
     */
-    public static function buildPrimaryUpdateQuery($schema, $request) {
+    public static function buildPrimaryInsertQuery($schema, $request) {
         $query = 'INSERT INTO ' . $schema->table_name . '(';
         foreach ($schema->fields as $field => $value) {
             end($schema->fields);
@@ -84,13 +98,18 @@ class QueryBuilder
         }
         $query .= " )VALUES( ";
         foreach ($request->values as $field => $value) {
+            $v = $value;
+            if ($field == $schema->key) {
+                $v = self::generateIdEntity($schema);
+            }
             end($request->values);
             if ($field === key($request->values)){
-                $query .= $value;
+                $query .= $v;
             } else {
-                $query .= $value . ',';
+                $query .= $v . ',';
             }
         }
+        return $query;
     }
 
     /**
