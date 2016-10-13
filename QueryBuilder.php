@@ -60,11 +60,11 @@ class QueryBuilder
     * generate id for entity (id_people...)
     */
     public static function generateIdEntity($schema) {
-        $query = 'SELECT ' . $schema->key . ' FROM ' . $schema->table_name . ' ORDER BY ' . $schema->order . ' LIMIT 1';
-        $lastId = self::execQuery($query);
-        var_dump($lastId);die();
-        if ($lastId) {
-            return $lastId++;
+        $key = $schema->key;
+        $query = 'SELECT ' . $key . ' FROM ' . $schema->table_name . ' ORDER BY ' . $key . ' DESC LIMIT 1';
+        $lastId = self::fetchQuery($query);
+        if ($lastId[$key]) {
+            return $lastId[$key] + 1;
         }
         return 1;
     }
@@ -192,6 +192,15 @@ class QueryBuilder
         $db = self::getDb();
         $q = $db->exec($query);
         return $q;
+    }
+
+    /**
+    * fetch query
+    */
+    public static function fetchQuery($query) {
+        $db = self::getDb();
+        $q = $db->query($query);
+        return $q->fetch();
     }
 
     /**
