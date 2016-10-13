@@ -27,7 +27,6 @@ class QueryBuilder
                     $tableName = $subTable->table_name;
                     $keyName = $schema->key;
                     $key = $request->sub_values->$tableName->$keyName;
-                    var_dump(self::buildSubInsertQuery($subTable, $request));die();
                     self::execQuery(self::buildSubInsertQuery($subTable, $request));
                 } 
             }
