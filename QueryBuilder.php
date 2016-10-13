@@ -20,8 +20,11 @@ class QueryBuilder
         $request = json_decode($jsonRequest);
         $schema = self::getSchema($request->entity);
         if ($schema) {
-            var_dump(self::buildPrimaryInsertQuery($schema, $request));
+            // var_dump(self::buildPrimaryInsertQuery($schema, $request));die();
             self::execQuery(self::buildPrimaryInsertQuery($schema, $request));   
+            if ($request->sub_values) {
+
+            }
         }
     }
     
@@ -98,9 +101,11 @@ class QueryBuilder
         }
         $query .= " )VALUES( ";
         foreach ($request->values as $field => $value) {
-            $v = $value;
+            $v = '"' . $value . '"';
             if ($field == $schema->key) {
                 $v = self::generateIdEntity($schema);
+            }else if (array_key_exists($field, self::COMMON_FIELDS)){
+                $v = self::COMMON_FIELDS[$field];
             }
             end($request->values);
             if ($field === key($request->values)){
@@ -109,6 +114,7 @@ class QueryBuilder
                 $query .= $v . ',';
             }
         }
+        $query .= ')';
         return $query;
     }
 
