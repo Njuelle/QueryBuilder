@@ -18,8 +18,12 @@ $fakeJson = '{
 	},
 	"sub_values" : {
 		"people_parents" : {
-			"id_people" : "17",
-			"titre" : "LE_TEST_UPDATE_FINAL"
+			"timestamp" : "timestamp",
+			"id_statut" : "statut id",
+			"id_people" : "id people",
+			"parent_de_id" : "parent de",
+			"titre" : "titre",
+			"autorite_parentale" : "autorite parentale"
 		}
 	}
 

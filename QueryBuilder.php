@@ -23,7 +23,13 @@ class QueryBuilder
             // var_dump(self::buildPrimaryInsertQuery($schema, $request));die();
             self::execQuery(self::buildPrimaryInsertQuery($schema, $request));   
             if ($request->sub_values) {
-
+                foreach ($schema->sub_tables as $subTable) {
+                    $tableName = $subTable->table_name;
+                    $keyName = $schema->key;
+                    $key = $request->sub_values->$tableName->$keyName;
+                    var_dump(self::buildSubInsertQuery($subTable, $request));die();
+                    self::execQuery(self::buildSubInsertQuery($subTable, $request));
+                } 
             }
         }
     }
@@ -151,6 +157,43 @@ class QueryBuilder
         //add sub query in string
         $key = $schema->key;
         $query .= " FROM " . $schema->table_name . " WHERE " . $schema->key . " = " . $request->values->$key . " ORDER BY " . $schema->order . " LIMIT 1";
+        return $query;
+    }
+
+    /**
+    * build sub insert query
+    */
+    public static function buildSubInsertQuery($subTable, $request) {
+        //begin build string INSERT INTO + fields names
+        $tableName = $subTable->table_name;
+        $query = 'INSERT INTO ' . $tableName . '(';
+        foreach ($subTable->fields as $field => $value) {
+            end($subTable->fields);
+            if ($field === key($subTable->fields)){
+                $query .= $field;
+            } else {
+                $query .= $field . ',';
+            }
+        }
+        //add values on query string
+        $query .= ")SELECT ";
+        foreach ($subTable->fields as $field => $value) {
+            if (array_key_exists($field, self::COMMON_FIELDS)){
+                $query .= self::COMMON_FIELDS[$field] . ',';
+            } elseif (array_key_exists($field, $request->sub_values->$tableName)) {
+                $query .= '"' . $request->sub_values->$tableName->$field . '",';
+            } else {
+                $query .=  $field .',';
+            }
+            //remove last coma
+            end($subTable->fields);
+            if ($field === key($subTable->fields)){
+                $query = substr($query,0,-1);
+            }
+        }
+        //add sub query in string
+        $key = $subTable->key;
+        $query .= " FROM " . $subTable->table_name . " WHERE " . $subTable->key . " = " . $request->sub_values->$tableName->$key . " ORDER BY " . $subTable->order . " LIMIT 1";
         return $query;
     }
 
