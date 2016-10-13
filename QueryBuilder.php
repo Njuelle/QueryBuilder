@@ -20,7 +20,6 @@ class QueryBuilder
         $request = json_decode($jsonRequest);
         $schema = self::getSchema($request->entity);
         if ($schema) {
-            // var_dump(self::buildPrimaryInsertQuery($schema, $request));die();
             self::execQuery(self::buildPrimaryInsertQuery($schema, $request));   
             if ($request->sub_values) {
                 foreach ($schema->sub_tables as $subTable) {
