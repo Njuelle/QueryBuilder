@@ -20,12 +20,9 @@ class QueryBuilder
         $request = json_decode($jsonRequest);
         $schema = self::getSchema($request->entity);
         if ($schema) {
-            self::execQuery(self::buildPrimaryInsertQuery($schema, $request));   
+            self::execQuery(self::buildPrimaryInsertQuery($schema, $request));
             if ($request->sub_values) {
                 foreach ($schema->sub_tables as $subTable) {
-                    $tableName = $subTable->table_name;
-                    $keyName = $schema->key;
-                    $key = $request->sub_values->$tableName->$keyName;
                     self::execQuery(self::buildSubInsertQuery($subTable, $request));
                 } 
             }
@@ -174,7 +171,7 @@ class QueryBuilder
             }
         }
         //add values on query string
-        $query .= ")SELECT ";
+        $query .= ")VALUES (";
         foreach ($subTable->fields as $field => $value) {
             if (array_key_exists($field, self::COMMON_FIELDS)){
                 $query .= self::COMMON_FIELDS[$field] . ',';
@@ -189,9 +186,7 @@ class QueryBuilder
                 $query = substr($query,0,-1);
             }
         }
-        //add sub query in string
-        $key = $subTable->key;
-        $query .= " FROM " . $subTable->table_name . " WHERE " . $subTable->key . " = " . $request->sub_values->$tableName->$key . " ORDER BY " . $subTable->order . " LIMIT 1";
+        $query .= ')';
         return $query;
     }
 
