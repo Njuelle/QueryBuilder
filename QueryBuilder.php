@@ -1,6 +1,6 @@
 <?php 
 /**
-* C.R.U.D query builder for DB, with json schemas
+* C.R.U.D query builder for DB, with json schemas and json request
 * By BOMBI
 */
 class QueryBuilder
@@ -15,6 +15,14 @@ class QueryBuilder
         'timestamp' => 'NOW()',
         'id_statut' => '"1"',
     );
+
+    public static function select($jsonRequest) { 
+        $request = json_decode($jsonRequest);
+        $schema = self::getSchema($request->entity);
+        if ($schema) {
+            
+        }
+    }
 
     public static function insert($jsonRequest) { 
         $request = json_decode($jsonRequest);
