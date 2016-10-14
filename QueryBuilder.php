@@ -20,7 +20,7 @@ class QueryBuilder
         $request = json_decode($jsonRequest);
         $schema = self::getSchema($request->entity);
         if ($schema) {
-            
+            $response = self::fetchQuery(self::buildSelectQuery($schema, $request));
         }
     }
 
@@ -93,6 +93,44 @@ class QueryBuilder
         }
         $query = 'UPDATE ' . $tableName . ' SET id_statut = 0' . ' WHERE id_statut = 1 AND ' . $schema->key .' = ' . $key . ' ORDER BY ' . $schema->order . ' LIMIT 1';
         $executedQuery = self::execQuery($query);
+    }
+
+    /**
+    * build select query
+    */
+    public static function buildSelectQuery($schema, $request) {
+        $query = 'SELECT ';
+        if ($request->fields == '*') {
+            $query .= '*';
+        } else {
+            foreach ($request->fields as $field) {
+                end($request->fields);
+                if ($field === key($request->fields)){
+                    $query .= $field;
+                } else {
+                    $query .= $field . ',';
+                }
+            }    
+        }
+        $query .= ' FROM ' . $request->entity;
+        $query .= self::getWhere($request);
+        return $query;
+    }
+
+    /**
+    * build where string
+    */
+    public static function getWhere($request) { 
+        $where = ' WHERE ';
+        foreach ($request->where as $key => $value) {
+            end($request->where);
+            if ($key === key($request->where)){
+                $where .= $key . '=' . '"' . $value . '"';
+            } else {
+                $where .= $key . '=' . '"' . $value . '",';
+            }
+        }
+        return $where;
     }
 
     /**
