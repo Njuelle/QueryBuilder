@@ -16,12 +16,21 @@ class QueryBuilder
         'id_statut' => '"1"',
     );
 
+    public static function select($jsonRequest) { 
+        $request = json_decode($jsonRequest);
+        $schema = self::getSchema($request->entity);
+        if ($schema) {
+            $response = self::fetchQuery(self::buildSelectQuery($schema, $request));
+            var_dump($response);
+        }
+    }
+
     public static function insert($jsonRequest) { 
         $request = json_decode($jsonRequest);
         $schema = self::getSchema($request->entity);
         if ($schema) {
             self::execQuery(self::buildPrimaryInsertQuery($schema, $request));
-            if ($request->sub_values) {
+            if (isset($request->sub_values)) {
                 foreach ($schema->sub_tables as $subTable) {
                     self::execQuery(self::buildSubInsertQuery($subTable, $request));
                 } 
@@ -35,7 +44,7 @@ class QueryBuilder
         if ($schema) {
             self::changeStatutLastRow($schema, $request);
             self::execQuery(self::buildPrimaryUpdateQuery($schema, $request));
-            if ($request->sub_values) {
+            if (isset($request->sub_values)) {
                 foreach ($schema->sub_tables as $subTable) {
                     $tableName = $subTable->table_name;
                     $keyName = $schema->key;
@@ -88,6 +97,47 @@ class QueryBuilder
     }
 
     /**
+<<<<<<< Updated upstream
+=======
+    * build select query
+    */
+    public static function buildSelectQuery($schema, $request) {
+        $query = 'SELECT ';
+        if ($request->fields == '*') {
+            $query .= '*';
+        } else {
+            foreach ($request->fields as $field) {
+                end($request->fields);
+                if ($field === key($request->fields)){
+                    $query .= $field;
+                } else {
+                    $query .= $field . ',';
+                }
+            }    
+        }
+        $query .= ' FROM ' . $request->entity;
+        $query .= self::getWhere($request);
+        return $query;
+    }
+
+    /**
+    * build where string
+    */
+    public static function getWhere($request) { 
+        $where = ' WHERE ';
+        foreach ($request->where as $key => $value) {
+            end($request->where);
+            if ($key === key($request->where)){
+                $where .= $key . '=' . '"' . $value . '"';
+            } else {
+                $where .= $key . '=' . '"' . $value . '" AND ';
+            }
+        }
+        return $where;
+    }
+
+    /**
+>>>>>>> Stashed changes
     * build primary insert query
     */
     public static function buildPrimaryInsertQuery($schema, $request) {
@@ -151,7 +201,7 @@ class QueryBuilder
         }
         //add sub query in string
         $key = $schema->key;
-        $query .= " FROM " . $schema->table_name . " WHERE " . $schema->key . " = " . $request->values->$key . " ORDER BY " . $schema->order . " LIMIT 1";
+        $query .= " FROM " . $schema->table_name . " WHERE " . $schema->key . " = " . $request->key . " ORDER BY " . $schema->order . " LIMIT 1";
         return $query;
     }
 
@@ -253,7 +303,7 @@ class QueryBuilder
             return new PDO('mysql:host=localhost;dbname=' . self::DB_TABLE . ';charset=utf8', self::DB_USER, self::DB_PASSWORD);
         }
         catch (Exception $e) {
-                die('Erreur : ' . $e->getMessage());
+            die('Erreur : ' . $e->getMessage());
         }
     }
 
